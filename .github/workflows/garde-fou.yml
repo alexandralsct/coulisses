@@ -1,0 +1,34 @@
+# Alerte de fuite : à chaque envoi (et chaque jour), vérifie que ce dépôt public ne contient que du code.
+# En cas de problème, le contrôle échoue et GitHub envoie un e-mail d'alerte à la propriétaire du dépôt.
+name: Garde-fou
+on:
+  push:
+  schedule:
+    - cron: "23 7 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fichiers autorisés seulement
+        run: |
+          ok='^(\.nojekyll|\.github/workflows/[^/]+\.yml|CLAUDE\.md|index\.html|app\.js|style\.css|sw\.js|manifest\.webmanifest|icon-(192|512)\.png)$'
+          interdits=$(git ls-files | grep -Ev "$ok" || true)
+          if [ -n "$interdits" ]; then echo "::error::Fichiers non autorisés :"; echo "$interdits"; exit 1; fi
+      - name: Aucun secret
+        run: |
+          if git grep -nIE 'sk-ant-[A-Za-z0-9_-]{10,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY' -- . ':!.github'; then
+            echo "::error::Un secret semble présent."; exit 1; fi
+      - name: Aucune adresse e-mail
+        run: |
+          if git grep -nIiE "[A-Z0-9._%+-]+@[A-Z0-9.-]+\.(fr|com|net|org|io)\b" -- . ':!.github'; then echo "::error::Adresse e-mail trouvée."; exit 1; fi
+      - name: Aucun mot de la liste privée
+        env:
+          MOTS: ${{ secrets.MOTS_INTERDITS }}
+        run: |
+          if [ -z "$MOTS" ]; then echo "::warning::Secret MOTS_INTERDITS absent : contrôle des mots privés non fait."; exit 0; fi
+          fautifs=$(git grep -lIiE -- "$MOTS" -- . ':!.github' || true)
+          if [ -n "$fautifs" ]; then echo "::error::Mot privé trouvé dans :"; echo "$fautifs"; exit 1; fi

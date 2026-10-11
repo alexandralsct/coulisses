@@ -1,0 +1,54 @@
+/* Coulisses : couleurs de la carte de vie (bleu Klein, crème, bleu clair). Une colonne téléphone. */
+:root{
+ --bg:#f4eee4; --carte:#fbf8f1; --ink:#002FA7; --clair:#c9d6f0; --texte:#14204a;
+ --ok:#1F8A5B; --veille:#C77700; --panne:#C62E3A; --gris:#8a93ad;
+ --display:"Instrument Sans","Helvetica Neue",Arial,sans-serif;
+ --body:"Outfit",system-ui,sans-serif; --mono:"DM Mono",ui-monospace,Menlo,monospace;
+ color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0e1830; --carte:#152248; --ink:#93b3f0; --clair:#24305e; --texte:#e6ecff;
+ --ok:#4CC88E; --veille:#F0A93B; --panne:#FF6B76; --gris:#7d88ae; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--texte);font:15px/1.45 var(--body);
+ padding:calc(env(safe-area-inset-top,0px) + 18px) 16px calc(env(safe-area-inset-bottom,0px) + 32px)}
+.ecran{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.tete{display:flex;justify-content:space-between;align-items:center;gap:12px}
+h1{margin:0;font:700 32px/1 var(--display);color:var(--ink);letter-spacing:-.01em}
+h2{margin:0 0 6px;font:600 18px var(--body);color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+h2 small{font:500 11px var(--mono);letter-spacing:.05em;color:var(--texte);opacity:.7}
+.sous{margin:-6px 0 0;font-size:13.5px;opacity:.8}
+.carte{background:var(--carte);border:2px solid var(--ink);border-radius:24px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.resume{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tuile{border-radius:18px;padding:10px 12px;background:var(--carte);border:2px solid var(--clair);display:flex;flex-direction:column;gap:2px}
+.tuile b{font:700 26px/1 var(--display);font-variant-numeric:tabular-nums}
+.tuile small{font:500 11px var(--mono);letter-spacing:.05em}
+.t-ok b{color:var(--ok)} .t-veille b{color:var(--veille)} .t-panne b{color:var(--panne)} .t-panne.actif{border-color:var(--panne)}
+details{border-top:1.5px solid var(--clair)}
+details:first-of-type{border-top:0}
+summary{list-style:none;display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;cursor:pointer;min-height:44px}
+summary::-webkit-details-marker{display:none}
+summary:focus-visible,.bouton:focus-visible,input:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:8px}
+.pt{width:12px;height:12px;border-radius:50%;background:var(--ok)}
+.pt.veille{background:var(--veille)} .pt.panne{background:var(--panne)} .pt.jamais{background:transparent;border:2px solid var(--gris)}
+.nom{min-width:0;overflow-wrap:anywhere}
+.nom span{display:block;font-size:12.5px;opacity:.75}
+.quand{font:500 12px var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.detail{margin:0 0 12px 22px;font-size:13.5px;background:var(--bg);border-radius:14px;padding:10px 12px;overflow-wrap:anywhere}
+.groupe{font:500 11px var(--mono);letter-spacing:.06em;opacity:.65;margin:10px 0 2px}
+.vide{margin:4px 0;font-size:14px;opacity:.75}
+.jauge{height:14px;border-radius:999px;background:var(--clair);overflow:hidden}
+.jauge i{display:block;height:100%;background:var(--ink);border-radius:999px}
+.ligne{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;font-variant-numeric:tabular-nums;flex-wrap:wrap;margin-top:6px}
+.bouton{font:600 14px var(--body);color:var(--ink);background:var(--carte);border:2px solid var(--ink);border-radius:999px;padding:9px 16px;min-height:44px;cursor:pointer}
+.bouton.plein{background:var(--ink);color:var(--carte)}
+.bouton.discret{border-color:var(--clair);font-weight:500}
+label{font:500 12px var(--mono);letter-spacing:.04em;margin-top:6px}
+input{font:15px var(--body);color:var(--texte);background:var(--bg);border:2px solid var(--clair);border-radius:12px;padding:10px 12px;width:100%}
+.msg{margin:4px 0 0;font-size:13.5px}
+.msg.erreur{color:var(--panne)}
+.reglages{gap:8px}
+.pied{font-size:12.5px;opacity:.7;margin:0;text-align:center}
+@media (prefers-reduced-motion:no-preference){.carte,.tuile{transition:border-color .2s}}
