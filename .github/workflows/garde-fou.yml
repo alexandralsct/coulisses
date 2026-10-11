@@ -3,11 +3,14 @@
 name: Garde-fou
 on:
   push:
+  pull_request:
   schedule:
     - cron: "23 7 * * *"
   workflow_dispatch:
 permissions:
   contents: read
+env:
+  SECRETS: 'sk-ant-[A-Za-z0-9_-]{10,}|ghp_[A-Za-z0-9]{20,}|gh[ousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{30,}|xox[abp]-[A-Za-z0-9-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY'
 jobs:
   verifier:
     runs-on: ubuntu-latest
@@ -18,17 +21,43 @@ jobs:
           ok='^(\.nojekyll|\.github/workflows/[^/]+\.yml|CLAUDE\.md|index\.html|app\.js|style\.css|sw\.js|manifest\.webmanifest|icon-(192|512)\.png)$'
           interdits=$(git ls-files | grep -Ev "$ok" || true)
           if [ -n "$interdits" ]; then echo "::error::Fichiers non autorisés :"; echo "$interdits"; exit 1; fi
-      - name: Aucun secret
+      - name: Aucun secret (y compris dans .github)
         run: |
-          if git grep -nIE 'sk-ant-[A-Za-z0-9_-]{10,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY' -- . ':!.github'; then
-            echo "::error::Un secret semble présent."; exit 1; fi
+          if git grep -lIE -- "$SECRETS"; then echo "::error::Un secret semble présent."; exit 1; fi
       - name: Aucune adresse e-mail
         run: |
           if git grep -nIiE "[A-Z0-9._%+-]+@[A-Z0-9.-]+\.(fr|com|net|org|io)\b" -- . ':!.github'; then echo "::error::Adresse e-mail trouvée."; exit 1; fi
-      - name: Aucun mot de la liste privée
+      - name: Aucun mot de la liste privée (mots entiers)
+        # La liste est un secret du dépôt (Settings → Secrets and variables → Actions → MOTS_INTERDITS), mots séparés par | ;
+        # elle n'apparaît jamais ici ni dans les journaux. Sans elle, le contrôle échoue.
         env:
           MOTS: ${{ secrets.MOTS_INTERDITS }}
         run: |
-          if [ -z "$MOTS" ]; then echo "::warning::Secret MOTS_INTERDITS absent : contrôle des mots privés non fait."; exit 0; fi
-          fautifs=$(git grep -lIiE -- "$MOTS" -- . ':!.github' || true)
+          if [ -z "$MOTS" ]; then echo "::error::Secret MOTS_INTERDITS absent : contrôle impossible."; exit 1; fi
+          fautifs=$(git grep -lIiwE -- "$MOTS" || true)
           if [ -n "$fautifs" ]; then echo "::error::Mot privé trouvé dans :"; echo "$fautifs"; exit 1; fi
+      - name: Icônes inchangées (empreintes sha256)
+        run: |
+          sha256sum -c --strict <<'FIN'
+          46c1456f022ff3212a776a2745af62a70837044a94ad55e765af9b737df79970  icon-192.png
+          83d67189db0f6d37e350b97359b128109f30d4e335132b0f0aa62e33102dede1  icon-512.png
+          FIN
+  historique:
+    # Chaque jour : tout l'historique public (lignes ajoutées et messages de commit) pour les secrets et les mots privés.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Historique complet
+        env:
+          MOTS: ${{ secrets.MOTS_INTERDITS }}
+        run: |
+          if [ -z "$MOTS" ]; then echo "::error::Secret MOTS_INTERDITS absent : contrôle impossible."; exit 1; fi
+          git log -p --all --no-color --format='@@commit %H' | awk '/^@@commit /{c=$2; next} /^\+\+\+ /{f=substr($0,7); next} /^\+/{print c" "f"\t"substr($0,2)}' > /tmp/hist
+          git log --all --format='%H message%x09%s %b%x00' | tr '\n' ' ' | tr '\0' '\n' >> /tmp/hist
+          ko=0
+          s=$(grep -E -- "$SECRETS" /tmp/hist | cut -f1 | sort -u || true); if [ -n "$s" ]; then echo "::error::Historique : secret dans :"; echo "$s"; ko=1; fi
+          m=$(grep -iwE -- "$MOTS" /tmp/hist | cut -f1 | sort -u || true); if [ -n "$m" ]; then echo "::error::Historique : mot privé dans :"; echo "$m"; ko=1; fi
+          exit $ko
