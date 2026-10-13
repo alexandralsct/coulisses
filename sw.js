@@ -1,8 +1,8 @@
 // Coulisses : cache du code seulement. L'état (etat.json) n'est jamais mis en cache ici.
-const C="coulisses-v2";
+const C="coulisses-v3";   // ne supprime que ses propres caches (coulisses-…) : la carte et LIFE vivent à la même adresse
 const FILES=["./","./index.html","./app.js","./style.css","./manifest.webmanifest","./icon-192.png","./icon-512.png"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));});
-self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()));});
+self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x.startsWith("coulisses-")&&x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()));});
 // Le code (page, app.js, style.css) vient d'abord du réseau, pour qu'une correction arrive tout de suite ;
 // la copie en cache ne sert que hors ligne. Les adresses avec « ?… » ne sont jamais gardées.
 const CODE=/\/(index\.html|app\.js|style\.css)?$/;
