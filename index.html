@@ -3,14 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://api.github.com; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://api.github.com; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#002FA7">
 <title>Coulisses</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon-192.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@500;600;700&family=Outfit:wght@400;500;600&family=DM+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -42,7 +41,7 @@
   <section class="carte" id="secRout"><h2>Routines Claude</h2><div id="listeRout"></div></section>
   <section class="carte reglages">
    <h2>Réglages</h2>
-   <button type="button" id="btnNotif" class="bouton">Activer les notifications</button>
+   <button type="button" id="btnNotif" class="bouton">Signaler les pannes à l’ouverture</button>
    <p class="msg" id="msgNotif" role="status"></p>
    <button type="button" id="btnOublier" class="bouton discret">Oublier le jeton sur cet appareil</button>
   </section>

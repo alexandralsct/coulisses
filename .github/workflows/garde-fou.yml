@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Fichiers autorisés seulement
         run: |
-          ok='^(\.nojekyll|\.github/workflows/[^/]+\.yml|CLAUDE\.md|index\.html|app\.js|style\.css|sw\.js|manifest\.webmanifest|icon-(192|512)\.png)$'
+          ok='^(\.nojekyll|\.github/workflows/[^/]+\.yml|CLAUDE\.md|index\.html|app\.js|style\.css|sw\.js|manifest\.webmanifest|icon-(192|512|maskable-512)\.png|icon\.svg|fonts/[a-z0-9-]+\.woff2|fonts/OFL-[A-Za-z]+\.txt)$'
           interdits=$(git ls-files | grep -Ev "$ok" || true)
           if [ -n "$interdits" ]; then echo "::error::Fichiers non autorisés :"; echo "$interdits"; exit 1; fi
       - name: Aucun secret (y compris dans .github)
@@ -39,8 +39,9 @@ jobs:
       - name: Icônes inchangées (empreintes sha256)
         run: |
           sha256sum -c --strict <<'FIN'
-          46c1456f022ff3212a776a2745af62a70837044a94ad55e765af9b737df79970  icon-192.png
-          83d67189db0f6d37e350b97359b128109f30d4e335132b0f0aa62e33102dede1  icon-512.png
+          43dadb144c51e197ddaa7aea30e317610bfa4ac3d32e6a5944d63d469ca48b40  icon-192.png
+          c6a3f5b73ded39387863023f9098c4e2d696fe0b1aa696885d1b1b8f0a359153  icon-512.png
+          f83a65da4f6a680c3b8e9cbbbadcfece903db342c41a1573f56ad86ffccb8fc4  icon-maskable-512.png
           FIN
   historique:
     # Chaque jour : tout l'historique public (lignes ajoutées et messages de commit) pour les secrets et les mots privés.

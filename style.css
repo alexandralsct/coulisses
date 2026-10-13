@@ -1,54 +1,112 @@
-/* Coulisses : couleurs de la carte de vie (bleu Klein, crème, bleu clair). Une colonne téléphone. */
-:root{
- --bg:#f4eee4; --carte:#fbf8f1; --ink:#002FA7; --clair:#c9d6f0; --texte:#14204a;
- --ok:#1F8A5B; --veille:#C77700; --panne:#C62E3A; --gris:#8a93ad;
- --display:"Instrument Sans","Helvetica Neue",Arial,sans-serif;
- --body:"Outfit",system-ui,sans-serif; --mono:"DM Mono",ui-monospace,Menlo,monospace;
- color-scheme:light;
+/* Coulisses : langage visuel commun aux trois apps (bleu Klein sur crème, trait de 1,5 px, ombres décalées sans flou,
+   Instrument Sans + IBM Plex Mono hébergées avec l'app). Une colonne téléphone. Charte : apps/charte/jetons.css. */
+/* ===== jetons communs : début (copie de apps/charte/jetons.css — ne pas modifier ici) ===== */
+/* ===== Jetons communs — LIFE, Coulisses, Tri Instagram (charte du 13/10/2026, audit design) =====
+   Source unique : apps/charte/jetons.css. Chaque app en garde une COPIE IDENTIQUE en tête de sa feuille de style,
+   entre les deux lignes « jetons communs » ; la recopier avec : python3 apps/charte/synchroniser.py
+   (tests/test_charte_apps.py vérifie que les trois copies sont identiques à la source et que les contrastes tiennent).
+   Polices : deux familles, hébergées avec chaque app (dossier fonts/ à côté de la page, licence SIL OFL 1.1) :
+   aucun appel à un tiers. Instrument Sans (titres, texte long) est une police variable : une seule déclaration.
+   Jour par défaut ; nuit par le réglage de l'appareil, ou forcée avec data-theme="nuit" (data-theme="jour" force le jour). */
+@font-face { font-family: 'Instrument Sans'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(fonts/instrument-sans.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/plex-mono-400.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: italic; font-weight: 400; font-display: swap; src: url(fonts/plex-mono-400-italique.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/plex-mono-500.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/plex-mono-600.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/plex-mono-700.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+:root {
+  /* couleurs : fond crème, encre bleu Klein (contrastes : tests/test_charte_apps.py) */
+  --fond: #F5EEE2; --plateau: #FAF5EC; --surface: #FEFAF3;
+  --encre: #002FA7; --encre-2: #4768BD; --texte: #14204A;
+  --trait: #002FA7; --trait-doux: #6F86C6; --pale: #DBE3F3; --ombre: #C9D6F0;
+  --plein: #002FA7; --sur-plein: #FDFAF4;
+  /* états : toujours doublés d'une forme ou d'un mot (jamais la couleur seule) */
+  --ok: #186E48; --veille: #925500; --panne: #B42A35; --neutre: #6F7896;
+  /* typographie : deux familles, sept tailles */
+  --display: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --t-xs: 12px; --t-s: 13px; --t-m: 14.5px; --t-l: 16px; --t-xl: 18px; --t-2xl: 22px; --t-3xl: 28px;
+  /* espace (grille de 4) */
+  --e-1: 4px; --e-2: 8px; --e-3: 12px; --e-4: 16px; --e-5: 24px; --e-6: 32px;
+  /* formes : trait de 1,5 px, ombres décalées sans flou */
+  --r-s: 8px; --r-m: 14px; --r-l: 24px; --r-p: 999px;
+  --trait-l: 1.5px;
+  --sh-1: 2px 2px 0 var(--ombre); --sh-2: 4px 4px 0 var(--ombre); --sh-3: 4px 4px 0 var(--encre);
+  --cible: 44px;
+  color-scheme: light;
 }
-@media (prefers-color-scheme:dark){:root{
- --bg:#0e1830; --carte:#152248; --ink:#93b3f0; --clair:#24305e; --texte:#e6ecff;
- --ok:#4CC88E; --veille:#F0A93B; --panne:#FF6B76; --gris:#7d88ae; color-scheme:dark}}
+:root[data-theme="nuit"] {
+  --fond: #0E1830; --plateau: #122041; --surface: #172A52;
+  --encre: #E3EAFF; --encre-2: #9AABD4; --texte: #E3EAFF;
+  --trait: #93B3F0; --trait-doux: #6A80B8; --pale: #29447F; --ombre: #070F22;
+  --plein: #93B3F0; --sur-plein: #0E1830;
+  --ok: #4CC88E; --veille: #F0A93B; --panne: #FF858D; --neutre: #8F9AC0;
+  --sh-3: 4px 4px 0 #2F55D4;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="jour"]) {
+    --fond: #0E1830; --plateau: #122041; --surface: #172A52;
+    --encre: #E3EAFF; --encre-2: #9AABD4; --texte: #E3EAFF;
+    --trait: #93B3F0; --trait-doux: #6A80B8; --pale: #29447F; --ombre: #070F22;
+    --plein: #93B3F0; --sur-plein: #0E1830;
+    --ok: #4CC88E; --veille: #F0A93B; --panne: #FF858D; --neutre: #8F9AC0;
+    --sh-3: 4px 4px 0 #2F55D4;
+    color-scheme: dark;
+  }
+}
+/* ===== jetons communs : fin ===== */
+/* Jetons propres à Coulisses : aucun (les états --ok, --veille, --panne, --neutre sont dans les jetons communs). */
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0}
-body{background:var(--bg);color:var(--texte);font:15px/1.45 var(--body);
+body{background:var(--fond);color:var(--texte);font:var(--t-m)/1.5 var(--display);
  padding:calc(env(safe-area-inset-top,0px) + 18px) 16px calc(env(safe-area-inset-bottom,0px) + 32px)}
-.ecran{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.ecran{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:var(--e-4)}
 .tete{display:flex;justify-content:space-between;align-items:center;gap:12px}
-h1{margin:0;font:700 32px/1 var(--display);color:var(--ink);letter-spacing:-.01em}
-h2{margin:0 0 6px;font:600 18px var(--body);color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-h2 small{font:500 11px var(--mono);letter-spacing:.05em;color:var(--texte);opacity:.7}
-.sous{margin:-6px 0 0;font-size:13.5px;opacity:.8}
-.carte{background:var(--carte);border:2px solid var(--ink);border-radius:24px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
-.resume{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.tuile{border-radius:18px;padding:10px 12px;background:var(--carte);border:2px solid var(--clair);display:flex;flex-direction:column;gap:2px}
-.tuile b{font:700 26px/1 var(--display);font-variant-numeric:tabular-nums}
-.tuile small{font:500 11px var(--mono);letter-spacing:.05em}
-.t-ok b{color:var(--ok)} .t-veille b{color:var(--veille)} .t-panne b{color:var(--panne)} .t-panne.actif{border-color:var(--panne)}
-details{border-top:1.5px solid var(--clair)}
+h1{margin:0;font:700 var(--t-3xl)/1 var(--display);color:var(--encre);letter-spacing:-.5px}
+h2{margin:0 0 6px;font:700 var(--t-xl)/1.3 var(--display);color:var(--encre);display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+h2 small{font:500 var(--t-xs) var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--encre-2)}
+.sous{margin:-8px 0 0;font:400 var(--t-xs)/1.4 var(--mono);color:var(--encre-2)}
+.carte{background:var(--surface);border:var(--trait-l) solid var(--trait);border-radius:var(--r-l);box-shadow:var(--sh-2);padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.resume{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--e-2)}
+.tuile{border-radius:var(--r-m);padding:10px 12px;background:var(--surface);border:var(--trait-l) solid var(--trait-doux);display:flex;flex-direction:column;gap:4px}
+.tuile b{font:700 var(--t-3xl)/1 var(--display);font-variant-numeric:tabular-nums}
+.tuile small{display:flex;align-items:center;gap:6px;font:500 var(--t-xs)/1.2 var(--mono);letter-spacing:.06em;color:var(--texte)}
+.tuile small::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:currentColor}
+.t-ok b{color:var(--ok)} .t-ok small::before{background:var(--ok)} .t-veille b{color:var(--veille)} .t-panne b{color:var(--panne)}
+.t-veille small::before{background:linear-gradient(90deg,var(--veille) 50%,transparent 50%);box-shadow:inset 0 0 0 2px var(--veille)}
+.t-panne small::before{border-radius:0;background:var(--panne);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.t-panne.actif{border-color:var(--panne);box-shadow:2px 2px 0 var(--panne)}
+details{border-top:1px solid var(--trait-doux)}
 details:first-of-type{border-top:0}
-summary{list-style:none;display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;cursor:pointer;min-height:44px}
+summary{list-style:none;display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;cursor:pointer;min-height:var(--cible)}
 summary::-webkit-details-marker{display:none}
-summary:focus-visible,.bouton:focus-visible,input:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:8px}
+summary:focus-visible,.bouton:focus-visible,input:focus-visible{outline:3px solid var(--trait);outline-offset:2px;border-radius:var(--r-s)}
+/* état : une FORME (● ok · ◐ en retard · ▲ panne · ○ jamais) et un MOT, jamais la couleur seule (WCAG 1.4.1) */
 .pt{width:12px;height:12px;border-radius:50%;background:var(--ok)}
-.pt.veille{background:var(--veille)} .pt.panne{background:var(--panne)} .pt.jamais{background:transparent;border:2px solid var(--gris)}
+.pt.veille{background:linear-gradient(90deg,var(--veille) 50%,transparent 50%);box-shadow:inset 0 0 0 2px var(--veille)}
+.pt.panne{width:14px;height:13px;border-radius:0;background:var(--panne);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.pt.jamais{background:transparent;box-shadow:inset 0 0 0 2px var(--neutre)}
 .nom{min-width:0;overflow-wrap:anywhere}
-.nom span{display:block;font-size:12.5px;opacity:.75}
-.quand{font:500 12px var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
-.detail{margin:0 0 12px 22px;font-size:13.5px;background:var(--bg);border-radius:14px;padding:10px 12px;overflow-wrap:anywhere}
-.groupe{font:500 11px var(--mono);letter-spacing:.06em;opacity:.65;margin:10px 0 2px}
-.vide{margin:4px 0;font-size:14px;opacity:.75}
-.jauge{height:14px;border-radius:999px;background:var(--clair);overflow:hidden}
-.jauge i{display:block;height:100%;background:var(--ink);border-radius:999px}
-.ligne{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;font-variant-numeric:tabular-nums;flex-wrap:wrap;margin-top:6px}
-.bouton{font:600 14px var(--body);color:var(--ink);background:var(--carte);border:2px solid var(--ink);border-radius:999px;padding:9px 16px;min-height:44px;cursor:pointer}
-.bouton.plein{background:var(--ink);color:var(--carte)}
-.bouton.discret{border-color:var(--clair);font-weight:500}
-label{font:500 12px var(--mono);letter-spacing:.04em;margin-top:6px}
-input{font:15px var(--body);color:var(--texte);background:var(--bg);border:2px solid var(--clair);border-radius:12px;padding:10px 12px;width:100%}
-.msg{margin:4px 0 0;font-size:13.5px}
+.nom span{display:block;font-size:var(--t-s);color:var(--encre-2)}
+.quand{display:flex;flex-direction:column;align-items:flex-end;gap:1px;font:500 var(--t-xs) var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mot{font:600 var(--t-xs)/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.mot.ok{color:var(--ok)} .mot.veille{color:var(--veille)} .mot.panne{color:var(--panne)} .mot.jamais{color:var(--neutre)}
+.detail{margin:0 0 12px 24px;font-size:var(--t-s);background:var(--fond);border-radius:var(--r-m);padding:10px 12px;overflow-wrap:anywhere}
+.groupe{font:500 var(--t-xs) var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--encre-2);margin:10px 0 2px}
+.vide{margin:4px 0;font-size:var(--t-m);color:var(--encre-2)}
+.jauge{height:14px;border-radius:var(--r-p);background:var(--pale);border:1px solid var(--trait-doux);overflow:hidden}
+.jauge i{display:block;height:100%;background:var(--plein);border-radius:var(--r-p)}
+.ligne{display:flex;justify-content:space-between;gap:8px;font-size:var(--t-s);font-variant-numeric:tabular-nums;flex-wrap:wrap;margin-top:6px}
+.bouton{font:600 var(--t-m) var(--mono);color:var(--encre);background:var(--surface);border:var(--trait-l) solid var(--trait);border-radius:var(--r-p);padding:9px 16px;min-height:var(--cible);cursor:pointer}
+.bouton:active{transform:translate(2px,2px)}
+.bouton.plein{background:var(--plein);border-color:var(--plein);color:var(--sur-plein);box-shadow:var(--sh-1)}
+.bouton.discret{border-color:var(--trait-doux);font-weight:500}
+label{font:500 var(--t-xs) var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--encre-2);margin-top:6px}
+input{font:var(--t-l) var(--mono);color:var(--encre);background:var(--fond);border:var(--trait-l) solid var(--trait);border-radius:var(--r-s);padding:10px 12px;width:100%;min-height:var(--cible)}
+.msg{margin:4px 0 0;font-size:var(--t-s)}
 .msg.erreur{color:var(--panne)}
 .reglages{gap:8px}
-.pied{font-size:12.5px;opacity:.7;margin:0;text-align:center}
+.pied{font:400 var(--t-xs) var(--mono);color:var(--encre-2);margin:0;text-align:center}
 @media (prefers-reduced-motion:no-preference){.carte,.tuile{transition:border-color .2s}}

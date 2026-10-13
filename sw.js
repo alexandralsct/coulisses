@@ -1,6 +1,7 @@
 // Coulisses : cache du code seulement. L'état (etat.json) n'est jamais mis en cache ici.
-const C="coulisses-v3";   // ne supprime que ses propres caches (coulisses-…) : la carte et LIFE vivent à la même adresse
-const FILES=["./","./index.html","./app.js","./style.css","./manifest.webmanifest","./icon-192.png","./icon-512.png"];
+const C="coulisses-v6";   // ne supprime que ses propres caches (coulisses-…) : la carte et LIFE vivent à la même adresse
+const FILES=["./","./index.html","./app.js","./style.css","./manifest.webmanifest","./icon-192.png","./icon-512.png","./icon-maskable-512.png","./icon.svg",
+  "./fonts/instrument-sans.woff2","./fonts/plex-mono-400.woff2","./fonts/plex-mono-500.woff2","./fonts/plex-mono-600.woff2","./fonts/plex-mono-700.woff2"];   // polices hébergées avec l'app (charte commune)
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x.startsWith("coulisses-")&&x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()));});
 // Le code (page, app.js, style.css) vient d'abord du réseau, pour qu'une correction arrive tout de suite ;

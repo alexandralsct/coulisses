@@ -5,6 +5,8 @@
   var CLE = "coulisses-config", CACHE = "coulisses-etat", VUES = "coulisses-pannes-vues";
   var $ = function (id) { return document.getElementById(id); };
   var LIB = { ok: "OK", veille: "À SURVEILLER", panne: "EN PANNE", jamais: "SANS TRACE" };
+  // Chaque pastille est doublée d'un mot (et d'une forme, voir style.css) : l'état ne repose jamais sur la couleur seule.
+  var MOT = { ok: "ok", veille: "en retard", panne: "panne", jamais: "jamais" };
   var ORDRE = { panne: 0, veille: 1, jamais: 2, ok: 3 };
 
   function lire(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
@@ -26,9 +28,11 @@
   function ligne(x, ouvert) {
     var d = el("details"); if (ouvert) d.open = true;
     var s = el("summary"), n = el("span", "nom", x.libelle || x.nom);
+    var etat = MOT[x.etat] ? x.etat : "jamais", q = el("span", "quand");
     if (x.libelle && x.libelle !== x.nom) n.append(el("span", null, x.nom));
-    else if (x.etat !== "ok") n.append(el("span", null, LIB[x.etat] || ""));
-    s.append(el("i", "pt " + (x.etat || "jamais")), n, el("span", "quand", x.depuis || heure(x.dernier)));
+    q.append(el("span", "mot " + etat, x.mot || MOT[etat]), el("span", null, x.depuis || heure(x.dernier)));
+    var pt = el("i", "pt " + etat); pt.setAttribute("aria-hidden", "true");
+    s.append(pt, n, q);
     d.append(s, el("div", "detail", x.detail || ""));
     return d;
   }
@@ -59,7 +63,9 @@
     ass.filter(function (a) { return a.etat === "ok"; }).forEach(function (a) { (fam[a.famille] = fam[a.famille] || []).push(a); });
     Object.keys(fam).sort().forEach(function (f) {
       var d = el("details"), s = el("summary");
-      s.append(el("i", "pt ok"), el("span", "nom", f), el("span", "quand", fam[f].length + " OK"));
+      var pt = el("i", "pt ok"), q = el("span", "quand"); pt.setAttribute("aria-hidden", "true");
+      q.append(el("span", "mot ok", "ok"), el("span", null, fam[f].length + " suivis"));
+      s.append(pt, el("span", "nom", f), q);
       var box = el("div", "detail"); fam[f].forEach(function (a) { box.append(ligne(a)); });
       d.append(s, box); $("listeAss").append(d);
     });
@@ -67,7 +73,7 @@
     var errs = e.erreurs || [], le = $("listeErr"); le.textContent = "";
     $("nbErr").textContent = errs.length ? String(errs.length) : "";
     if (!errs.length) le.append(el("p", "vide", "Aucune erreur sur les dernières 24 h."));
-    errs.forEach(function (x) { le.append(ligne({ libelle: x.workflow, nom: "erreur", etat: "veille", dernier: x.t, detail: x.message })); });
+    errs.forEach(function (x) { le.append(ligne({ libelle: x.workflow, nom: "erreur", etat: "veille", mot: "erreur", dernier: x.t, detail: x.message })); });
 
     var q = e.quota, bq = $("quota"); bq.textContent = "";
     if (!q || q.projete_pct == null) bq.append(el("p", "vide", "Pas encore de chiffre (il vient de l'audit hebdomadaire)."));
