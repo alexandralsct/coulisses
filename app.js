@@ -46,7 +46,7 @@
 
   function afficher(e) {
     $("relier").hidden = true; $("contenu").hidden = false;
-    $("quand").textContent = "Mis à jour " + heure(e.maj) + " · lecture seule";
+    $("quand").textContent = "État mis à jour " + heure(e.maj);
     var r = e.resume || {}, res = $("resume"); res.textContent = "";
     [["ok", "TOURNENT"], ["veille", "À SURVEILLER"], ["panne", "EN PANNE"]].forEach(function (p) {
       var t = el("div", "tuile t-" + p[0] + (p[0] === "panne" && r.panne ? " actif" : ""));

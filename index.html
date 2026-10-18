@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://api.github.com; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://api.github.com https:; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#002FA7">
 <title>Coulisses</title>
@@ -19,6 +19,12 @@
   <button type="button" id="btnMaj" class="bouton">Actualiser</button>
  </header>
  <p class="sous" id="quand">Chargement…</p>
+ <nav class="vues" id="vues" aria-label="Vues">
+  <button type="button" class="vue" id="vueEtat" aria-pressed="true">État</button>
+  <button type="button" class="vue" id="vuePiloter" aria-pressed="false">Piloter</button>
+ </nav>
+ <div class="plan" id="plan">
+ <div class="col-etat" id="colEtat">
 
  <section id="relier" class="carte" hidden>
   <h2>Relier Coulisses</h2>
@@ -45,9 +51,41 @@
    <p class="msg" id="msgNotif" role="status"></p>
    <button type="button" id="btnOublier" class="bouton discret">Oublier le jeton sur cet appareil</button>
   </section>
-  <p class="pied">Lecture seule : rien ne se déclenche d'ici.</p>
+  <p class="pied">Cette colonne est en lecture seule ; les gestes se font dans « Piloter ».</p>
+ </div>
+ </div>
+
+ <div class="col-piloter" id="colPiloter">
+  <section id="pRelier" class="carte" hidden>
+   <h2>Piloter Cocon</h2>
+   <p>Des boutons, sans IA : voir l'état en direct, relancer un flux, le mettre en pause, le reprendre, lire son journal, recevoir les alertes. Rien ne s'active d'ici : un flux jamais lancé s'active dans l'éditeur de Cocon.</p>
+   <label for="champAdresse">Adresse de Cocon</label>
+   <input id="champAdresse" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="url" placeholder="https://…">
+   <label for="champCle">Clé de pilotage</label>
+   <input id="champCle" type="password" autocomplete="off" spellcheck="false" placeholder="64 caractères">
+   <button type="button" id="btnPRelier" class="bouton plein">Relier</button>
+   <p class="msg" id="msgPRelier" role="status"></p>
+  </section>
+  <div id="pContenu" hidden>
+   <section class="carte">
+    <h2>Flux de Cocon <small id="pQuand"></small></h2>
+    <div class="ligne-actions"><button type="button" id="btnPMaj" class="bouton">Actualiser</button></div>
+    <p class="msg" id="msgP" role="status" aria-live="polite"></p>
+    <div id="pListe"></div>
+   </section>
+   <section class="carte reglages">
+    <h2>Alertes</h2>
+    <p class="vide">Cocon te prévient sur cet appareil quand un flux tombe en panne ou reste silencieux (vérification toutes les 15 min).</p>
+    <button type="button" id="btnAlertes" class="bouton">Recevoir les alertes ici</button>
+    <p class="msg" id="msgAlertes" role="status"></p>
+    <button type="button" id="btnPOublier" class="bouton discret">Oublier la clé de pilotage sur cet appareil</button>
+   </section>
+   <p class="pied">Chaque geste est noté au journal de Cocon.</p>
+  </div>
+ </div>
  </div>
 </main>
 <script src="app.js"></script>
+<script src="piloter.js"></script>
 </body>
 </html>

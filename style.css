@@ -110,3 +110,34 @@ input{font:var(--t-l) var(--mono);color:var(--encre);background:var(--fond);bord
 .reglages{gap:8px}
 .pied{font:400 var(--t-xs) var(--mono);color:var(--encre-2);margin:0;text-align:center}
 @media (prefers-reduced-motion:no-preference){.carte,.tuile{transition:border-color .2s}}
+/* ===== Piloter (18/10) ===== */
+.vues{display:grid;grid-template-columns:1fr 1fr;gap:0;border:var(--trait-l) solid var(--trait);border-radius:var(--r-p);overflow:hidden;background:var(--surface)}
+.vue{font:600 var(--t-m) var(--mono);color:var(--encre);background:transparent;border:0;min-height:var(--cible);cursor:pointer}
+.vue[aria-pressed="true"]{background:var(--plein);color:var(--sur-plein)}
+.vue:focus-visible{outline:3px solid var(--trait);outline-offset:-4px}
+.plan,.col-etat,.col-piloter{display:flex;flex-direction:column;gap:var(--e-4)}
+.col-etat>#contenu{display:flex;flex-direction:column;gap:var(--e-4)}
+.col-etat>#contenu[hidden]{display:none}
+/* App téléphone : un onglet à la fois */
+.col-piloter{display:none}
+body.v-piloter .col-piloter{display:flex}
+body.v-piloter .col-etat{display:none}
+.ligne-actions{display:flex;flex-wrap:wrap;gap:var(--e-2);margin-top:var(--e-2)}
+.ligne-actions .bouton{flex:1 1 auto}
+.bouton:disabled{opacity:.5;cursor:wait}
+.flux .detail p{margin:0 0 6px}
+.groupe-replie>.detail{margin-left:0;background:transparent;padding:0}
+.journal{list-style:none;margin:var(--e-2) 0 0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:var(--t-s)}
+.journal li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;overflow-wrap:anywhere}
+.journal .t{font:500 var(--t-xs) var(--mono);color:var(--encre-2);white-space:nowrap;padding-top:2px}
+.journal li.ko span:last-child{color:var(--panne)}
+/* App ordinateur : les deux colonnes côte à côte, pas d'onglets */
+@media (min-width:900px) and (pointer:fine){
+ .ecran{max-width:1180px}
+ .vues{display:none}
+ .plan{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--e-5);align-items:start}
+ .col-piloter,body.v-piloter .col-piloter,body.v-piloter .col-etat{display:flex}
+ .col-piloter{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;padding:0 6px 6px 0}
+ .ligne-actions .bouton{flex:0 0 auto}
+ summary:hover .nom{text-decoration:underline;text-underline-offset:3px}
+}
