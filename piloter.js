@@ -34,13 +34,13 @@
   // ─── Appel à Cocon ───
   function appeler(corps) {
     var c = lire();
-    if (!c) return Promise.reject(new Error("Pas encore relié."));
+    if (!c) return Promise.reject(new Error(Connexion.ERREUR));
     return fetch(c.adresse + "/crochets/pilote", { method: "POST", cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer",
       headers: { "content-type": "application/json", "x-cle-pilote": c.cle }, body: JSON.stringify(corps) })
       .catch(function () { throw new Error("Cocon injoignable (réseau, ou serveur arrêté)."); })
       .then(function (r) {
         return r.json().catch(function () { return {}; }).then(function (j) {
-          if (r.status === 403) throw Object.assign(new Error("Clé de pilotage refusée."), { cle: true });
+          if (r.status === 403) throw Object.assign(new Error(Connexion.ERREUR), { cle: true });
           if (r.status === 429) throw new Error("Trop d'essais : réessaie dans quelques minutes.");
           if (r.status === 404 && !j.reponse) throw new Error("Le pilotage n'est pas activé sur Cocon (onglet « Pilotage » désactivé).");
           if (!r.ok || j.ok === false) throw new Error(j.reponse || ("Cocon a répondu " + r.status + "."));

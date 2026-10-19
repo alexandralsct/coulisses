@@ -11,6 +11,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="connexion.css">
 </head>
 <body>
 <main class="ecran">
@@ -19,6 +20,7 @@
   <button type="button" id="btnMaj" class="bouton">Actualiser</button>
  </header>
  <p class="sous" id="quand">Chargement…</p>
+ <details class="carte" id="cxCarte"><summary>Connexion</summary><div id="connexion-ecran"></div></details>
  <nav class="vues" id="vues" aria-label="Vues">
   <button type="button" class="vue" id="vueEtat" aria-pressed="true">État</button>
   <button type="button" class="vue" id="vuePiloter" aria-pressed="false">Piloter</button>
@@ -85,6 +87,8 @@
  </div>
  </div>
 </main>
+<script src="qr.js"></script>
+<script src="connexion.js"></script>
 <script src="app.js"></script>
 <script src="piloter.js"></script>
 </body>

@@ -103,12 +103,12 @@
 
   function charger(silencieux) {
     var cfg = lire(CLE);
-    if (!cfg || !cfg.depot || !cfg.jeton) { $("relier").hidden = false; $("contenu").hidden = true; $("quand").textContent = "Pas encore relié."; return Promise.resolve(); }
+    if (!cfg || !cfg.depot || !cfg.jeton) { $("relier").hidden = false; $("contenu").hidden = true; $("quand").textContent = Connexion.ERREUR; return Promise.resolve(); }
     if (!silencieux) $("quand").textContent = "Mise à jour…";
     return fetch("https://api.github.com/repos/" + cfg.depot + "/contents/etat.json", {
       headers: { Authorization: "Bearer " + cfg.jeton, Accept: "application/vnd.github.raw+json", "X-GitHub-Api-Version": "2022-11-28" }, cache: "no-store"
     }).then(function (r) {
-      if (r.status === 401) throw new Error("Jeton refusé par GitHub : vérifie-le ou crée-en un nouveau.");
+      if (r.status === 401) throw new Error(Connexion.ERREUR);
       if (r.status === 404) throw new Error("Dépôt ou état introuvable : vérifie le nom du dépôt et que le jeton y a accès.");
       if (!r.ok) throw new Error("GitHub a répondu " + r.status + ". Réessaie plus tard.");
       return r.json();
@@ -140,5 +140,10 @@
 
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
   var c = lire(CACHE); if (c && lire(CLE)) afficher(c);
+  // Écran « Connexion » commun aux trois apps (connexion.js) : s'ouvre tout seul tant que Coulisses n'est pas relié.
+  Connexion.monter($("connexion-ecran"), { github: true, carteUrl: location.origin + "/carte-de-vie/",
+    qr: function (t) { var q = qrcode(0, "M"); q.addData(t); q.make(); return q.createDataURL(6, 2); },
+    apres: function () { setTimeout(function () { location.reload(); }, 1500); } });
+  if (!lire(CLE)) $("cxCarte").open = true;
   charger();
 })();
