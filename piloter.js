@@ -16,6 +16,8 @@
   // Règle de sécurité resserrée : une fois l'adresse connue, la page ne peut plus parler qu'à GitHub et à Cocon.
   function serrer(origine) {
     if (!origine || document.querySelector("meta[data-serre]")) return;
+    try { origine = new URL(origine).origin; } catch (e) { return; }
+    if (!/^https:/.test(origine)) return;
     var m = document.createElement("meta");
     m.httpEquiv = "Content-Security-Policy"; m.content = "connect-src https://api.github.com " + origine; m.setAttribute("data-serre", "1");
     document.head.appendChild(m);
@@ -163,16 +165,46 @@
       });
   }
 
-  // Le bouton « en panne » de la colonne État ouvre directement la liste des pannes de Piloter.
-  function defiler() {
-    var t = $("pPannes");
-    if (t) { t.scrollIntoView({ block: "start" }); msg("msgP", ""); } else msg("msgP", "Aucune panne en ce moment.");
+  // ─── Pannes de la colonne État : Diagnostiquer et Réparer (les boutons sont dans app.js, le travail ici) ───
+  // `relier` ouvre l'écran Connexion ; sans pilotage connecté, chaque bouton le propose au lieu de ne rien faire.
+  function sansPilotage(boite, relier) {
+    boite.textContent = "";
+    boite.append(el("p", "msg erreur", "Le pilotage n'est pas connecté sur cet appareil : ouvre Connexion pour saisir l'adresse et la clé."));
+    boite.append(bouton("Ouvrir Connexion", "plein", relier));
   }
-  window.Pilotage = { versPannes: function () {
-    vue("piloter"); history.replaceState(null, "", "#piloter");
-    if (dernierEtat) { charger(true).then(defiler); return; }
-    charger().then(function () { if (dernierEtat) defiler(); });
-  } };
+  function trouver(e, nom) {
+    var n = String(nom || "").trim().toLowerCase();
+    return (e.onglets || []).filter(function (o) { return String(o.nom || "").trim().toLowerCase() === n; })[0] || null;
+  }
+  // Lit l'état en direct puis rend le flux qui porte ce nom (null si la panne n'est pas un flux de Cocon : sauvegarde, routine, app).
+  function fluxDe(p) { return appeler({ commande: "etat" }).then(function (e) { afficher(e); return trouver(e, p.nom); }); }
+  function pasUnFlux(boite) { boite.append(el("p", "vide", "Ce n'est pas un flux de Cocon (sauvegarde, routine ou app) : rien à lire ni à relancer d'ici.")); }
+
+  function diagnostiquer(p, boite, b, relier) {
+    if (!lire()) { sansPilotage(boite, relier); return; }
+    boite.textContent = ""; boite.append(el("p", "vide", "Dernière exécution : " + (p.depuis || heure(p.dernier)) + "."));
+    if (p.detail) boite.append(el("p", "msg erreur", p.detail));
+    b.disabled = true;
+    fluxDe(p).then(function (x) {
+      if (!x) { pasUnFlux(boite); return; }
+      (x.erreurs || []).forEach(function (e) { boite.append(el("p", "msg erreur", "Erreur " + heure(e.t) + " : " + e.message)); });
+      var jb = el("div"); boite.append(jb); journal(x, jb, b);
+    }).catch(function (e) { boite.append(el("p", "msg erreur", e.message)); })
+      .then(function () { b.disabled = false; });
+  }
+
+  function reparer(p, boite, b, relier) {
+    if (!lire()) { sansPilotage(boite, relier); return; }
+    boite.textContent = ""; b.disabled = true;
+    fluxDe(p).then(function (x) {
+      if (!x) { pasUnFlux(boite); return; }
+      if (!x.peut.relancer) { boite.append(el("p", "msg erreur", x.etat === "actif" ? "Ce flux n'a pas de départ à relancer." : "Ce flux n'est pas actif : il ne se relance pas d'ici.")); return; }
+      if (!window.confirm("Réparer « " + x.nom + " » : le relancer maintenant ?")) return;
+      return appeler({ commande: "relancer", onglet: x.id }).then(function (j) { boite.append(el("p", "msg", x.nom + " : " + (j.reponse || "fait"))); });
+    }).catch(function (e) { boite.append(el("p", "msg erreur", e.message)); })
+      .then(function () { b.disabled = false; });
+  }
+  window.Pilotage = { diagnostiquer: diagnostiquer, reparer: reparer };
 
   // ─── Relier, oublier ───
   $("btnPMaj").addEventListener("click", function () { charger(); });

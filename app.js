@@ -44,20 +44,60 @@
       .forEach(function (x) { c.append(ligne(x, x.etat === "panne")); });
   }
 
+  // Le quota n'est plus suivi (consigne du 13/10) : même si un ancien état en contient encore, il n'est ni listé ni compté.
+  function sansQuota(l) { return (l || []).filter(function (x) { return !/quota/i.test(x.nom || x.libelle || ""); }); }
+
+  function relier() { var d = $("cxCarte"); d.open = true; d.scrollIntoView({ block: "start" }); }
+
+  // Liste des pannes (ouverte par la tuile EN PANNE) : chaque panne a Diagnostiquer et Réparer, qui passent par le pilotage.
+  function lignePanne(x) {
+    var d = ligne(x, true), box = d.querySelector(".detail"), acts = el("div", "ligne-actions"), sortie = el("div", "boite-journal");
+    [["Diagnostiquer", "", "diagnostiquer"], ["Réparer", "plein", "reparer"]].forEach(function (a) {
+      var b = el("button", "bouton " + a[1], a[0]); b.type = "button";
+      b.addEventListener("click", function () { if (window.Pilotage) window.Pilotage[a[2]](x, sortie, b, relier); });
+      acts.append(b);
+    });
+    box.append(acts, sortie);
+    return d;
+  }
+
+  function pannes(items) {
+    var l = $("listePannes"); l.textContent = "";
+    $("nbPannes").textContent = items.length ? String(items.length) : "";
+    if (!lire("coulisses-pilote")) {
+      var n = el("div", "detail");
+      n.append(el("p", "msg erreur", "Le pilotage n'est pas connecté sur cet appareil : Diagnostiquer et Réparer en ont besoin."));
+      var b = el("button", "bouton plein", "Ouvrir Connexion"); b.type = "button"; b.addEventListener("click", relier); n.append(b);
+      l.append(n);
+    }
+    if (!items.length) { l.append(el("p", "vide", "Aucune panne en ce moment.")); return; }
+    items.forEach(function (x) { l.append(lignePanne(x)); });
+  }
+
   function afficher(e) {
     $("relier").hidden = true; $("contenu").hidden = false;
     $("quand").textContent = "État mis à jour " + heure(e.maj);
-    var r = e.resume || {}, res = $("resume"); res.textContent = "";
+    var ass = sansQuota(e.assistants), lignesApp = sansQuota(e.app && e.app.lignes), rout = sansQuota(e.routines), sauv = sansQuota(e.sauvegardes);
+    var tout = ass.concat(lignesApp, rout, sauv), r = { ok: 0, veille: 0, panne: 0 }, res = $("resume"); res.textContent = "";
+    tout.forEach(function (x) { if (r[x.etat] != null) r[x.etat]++; });
+    pannes(tout.filter(function (x) { return x.etat === "panne"; }));
     [["ok", "TOURNENT"], ["veille", "À SURVEILLER"], ["panne", "EN PANNE"]].forEach(function (p) {
       var cl = p[0] === "panne", t = el(cl ? "button" : "div", "tuile t-" + p[0] + (cl && r.panne ? " actif" : ""));
-      if (cl) { t.type = "button"; t.setAttribute("aria-label", (r.panne || 0) + " en panne : ouvrir la liste des pannes"); t.addEventListener("click", function () { if (window.Pilotage) window.Pilotage.versPannes(); }); }
-      t.append(el("b", null, String(r[p[0]] || 0)), el("small", null, p[1])); res.append(t);
+      if (cl) {
+        t.type = "button"; t.setAttribute("aria-expanded", String(!$("secPannes").hidden));
+        t.setAttribute("aria-label", r.panne + " en panne : ouvrir ou fermer la liste des pannes");
+        t.addEventListener("click", function () {
+          var s = $("secPannes"); s.hidden = !s.hidden; t.setAttribute("aria-expanded", String(!s.hidden));
+          if (!s.hidden) s.scrollIntoView({ block: "start" });
+        });
+      }
+      t.append(el("b", null, String(r[p[0]])), el("small", null, p[1])); res.append(t);
     });
 
     $("version").textContent = e.app && e.app.version ? "V" + e.app.version : "";
-    liste("listeApp", e.app && e.app.lignes, "Pas d'information sur l'app.");
+    liste("listeApp", lignesApp, "Pas d'information sur l'app.");
 
-    var ass = e.assistants || [], soucis = ass.filter(function (a) { return a.etat !== "ok"; });
+    var soucis = ass.filter(function (a) { return a.etat !== "ok"; });
     $("nbAss").textContent = ass.length + " SUIVIS";
     liste("listeAss", soucis, "Tous les assistants tournent.");
     var fam = {};
@@ -76,9 +116,9 @@
     if (!errs.length) le.append(el("p", "vide", "Aucune erreur sur les dernières 24 h."));
     errs.forEach(function (x) { le.append(ligne({ libelle: x.workflow, nom: "erreur", etat: "veille", mot: "erreur", dernier: x.t, detail: x.message })); });
 
-    liste("listeSauv", e.sauvegardes, "Aucune sauvegarde suivie.");
-    liste("listeRout", e.routines, "Aucune routine suivie.");
-    prevenir(ass.concat(e.app && e.app.lignes || [], e.routines || [], e.sauvegardes || []));
+    liste("listeSauv", sauv, "Aucune sauvegarde suivie.");
+    liste("listeRout", rout, "Aucune routine suivie.");
+    prevenir(tout);
   }
 
   // Notification seulement pour une panne pas encore signalée sur cet appareil.
@@ -112,7 +152,7 @@
   }
 
   Array.prototype.forEach.call(document.querySelectorAll(".ouvre-cx"), function (b) {   // les deux « Relier » renvoient vers l'écran Connexion unique
-    b.addEventListener("click", function () { var d = $("cxCarte"); d.open = true; d.scrollIntoView({ block: "start" }); });
+    b.addEventListener("click", relier);
   });
   $("btnMaj").addEventListener("click", function () { charger(); });
   $("btnOublier").addEventListener("click", function () { oublier(CLE); oublier(CACHE); oublier(VUES); location.reload(); });
