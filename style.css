@@ -71,6 +71,8 @@ h2 small{font:500 var(--t-xs) var(--mono);letter-spacing:.1em;text-transform:upp
 .carte{background:var(--surface);border:var(--trait-l) solid var(--trait);border-radius:var(--r-l);box-shadow:var(--sh-2);padding:14px 16px;display:flex;flex-direction:column;gap:4px}
 .resume{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--e-2)}
 .tuile{border-radius:var(--r-m);padding:10px 12px;background:var(--surface);border:var(--trait-l) solid var(--trait-doux);display:flex;flex-direction:column;gap:4px}
+button.tuile{font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}
+button.tuile:focus-visible{outline:2px solid currentColor;outline-offset:2px}
 .tuile b{font:700 var(--t-3xl)/1 var(--display);font-variant-numeric:tabular-nums}
 .tuile small{display:flex;align-items:center;gap:6px;font:500 var(--t-xs)/1.2 var(--mono);letter-spacing:.06em;color:var(--texte)}
 .tuile small::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:currentColor}

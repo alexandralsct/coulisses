@@ -49,7 +49,8 @@
     $("quand").textContent = "État mis à jour " + heure(e.maj);
     var r = e.resume || {}, res = $("resume"); res.textContent = "";
     [["ok", "TOURNENT"], ["veille", "À SURVEILLER"], ["panne", "EN PANNE"]].forEach(function (p) {
-      var t = el("div", "tuile t-" + p[0] + (p[0] === "panne" && r.panne ? " actif" : ""));
+      var cl = p[0] === "panne", t = el(cl ? "button" : "div", "tuile t-" + p[0] + (cl && r.panne ? " actif" : ""));
+      if (cl) { t.type = "button"; t.setAttribute("aria-label", (r.panne || 0) + " en panne : ouvrir la liste des pannes"); t.addEventListener("click", function () { if (window.Pilotage) window.Pilotage.versPannes(); }); }
       t.append(el("b", null, String(r[p[0]] || 0)), el("small", null, p[1])); res.append(t);
     });
 
@@ -75,16 +76,6 @@
     if (!errs.length) le.append(el("p", "vide", "Aucune erreur sur les dernières 24 h."));
     errs.forEach(function (x) { le.append(ligne({ libelle: x.workflow, nom: "erreur", etat: "veille", mot: "erreur", dernier: x.t, detail: x.message })); });
 
-    var q = e.quota, bq = $("quota"); bq.textContent = "";
-    if (!q || q.projete_pct == null) bq.append(el("p", "vide", "Pas encore de chiffre (il vient de l'audit hebdomadaire)."));
-    else {
-      var j = el("div", "jauge"), i = el("i"); i.style.width = Math.min(100, q.projete_pct) + "%"; j.append(i);
-      j.setAttribute("role", "img"); j.setAttribute("aria-label", "Quota projeté " + q.projete_pct + " %");
-      var l1 = el("div", "ligne"); l1.append(el("span", null, "Projeté fin de mois : " + q.projete_pct + " % des " + q.limite), el("span", null, q.executions != null ? q.executions + " exécutions" : ""));
-      var l2 = el("div", "ligne"); l2.append(el("span", null, "Selon l'audit du " + heure(q.date)), el("span", null, LIB[q.etat] || ""));
-      bq.append(j, l1, l2);
-    }
-    $("moisQuota").textContent = new Date().toLocaleDateString("fr-FR", { month: "long" }).toUpperCase();
     liste("listeSauv", e.sauvegardes, "Aucune sauvegarde suivie.");
     liste("listeRout", e.routines, "Aucune routine suivie.");
     prevenir(ass.concat(e.app && e.app.lignes || [], e.routines || [], e.sauvegardes || []));

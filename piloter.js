@@ -86,8 +86,16 @@
       .then(function () { b.disabled = false; });
   }
 
-  function flux(x, ouvert) {
-    var d = el("details", "flux"); d.dataset.id = x.id; if (ouvert) d.open = true;
+  // Diagnostic sans IA : l'erreur, la dernière exécution et le journal, lus par les routes de pilotage existantes (état déjà reçu, « journal »).
+  function diagnostic(x, boite, b) {
+    boite.textContent = "";
+    boite.append(el("p", "vide", "Dernière exécution : " + heure(x.dernier) + "."));
+    (x.erreurs || []).forEach(function (e) { boite.append(el("p", "msg erreur", "Erreur " + heure(e.t) + " : " + e.message)); });
+    var jb = el("div"); boite.append(jb); journal(x, jb, b);
+  }
+
+  function flux(x, ouvert, panne) {
+    var d = el("details", "flux"); d.dataset.id = x.id; if (ouvert || panne) d.open = true;
     var s = el("summary"), pt = el("i", "pt " + (x.erreurs && x.erreurs.length && x.etat === "actif" ? "panne" : FORME[x.etat]));
     pt.setAttribute("aria-hidden", "true");
     var q = el("span", "quand");
@@ -96,19 +104,23 @@
     var box = el("div", "detail");
     (x.erreurs || []).forEach(function (e) { box.append(el("p", "msg erreur", "Erreur " + heure(e.t) + " : " + e.message)); });
     var actions = el("div", "ligne-actions");
-    if (x.peut.relancer) actions.append(bouton("Relancer maintenant", "plein", function () { geste(x, "relancer", "Relancer « " + x.nom + " » maintenant ?", d); }));
+    var diag = el("div", "boite-journal");
+    if (panne && x.etat === "actif") {
+      var bd = bouton("Diagnostiquer", "", function () { diagnostic(x, diag, bd); }); actions.append(bd);
+      if (x.peut.relancer) actions.append(bouton("Réparer", "plein", function () { geste(x, "relancer", "Réparer « " + x.nom + " » : le relancer maintenant ?", d); }));
+    } else if (x.peut.relancer) actions.append(bouton("Relancer maintenant", "plein", function () { geste(x, "relancer", "Relancer « " + x.nom + " » maintenant ?", d); }));
     if (x.peut.pause) actions.append(bouton("Mettre en pause", "", function () { geste(x, "pause", "Mettre « " + x.nom + " » en pause ? Il ne tournera plus jusqu'à ce que tu le reprennes.", d); }));
     if (x.peut.reprendre) actions.append(bouton("Reprendre", "plein", function () { geste(x, "reprendre", null, d); }));
     var boite = el("div", "boite-journal"), bj = bouton("Journal", "discret", function () { journal(x, boite, bj); });
     actions.append(bj);
     if (x.etat === "desactive") box.append(el("p", "vide", "Jamais activé ou arrêté dans l'éditeur : il s'active dans l'éditeur de Cocon, pas d'ici."));
     else if (!x.peut.pause && x.etat === "actif") box.append(el("p", "vide", "Flux protégé : il ne se met pas en pause d'ici."));
-    box.append(actions, boite);
+    box.append(actions, diag, boite);
     d.append(s, box);
     return d;
   }
 
-  function groupe(cible, titre, items, ouvertId, replie) {
+  function groupe(cible, titre, items, ouvertId, replie, panne) {
     if (!items.length) return;
     if (replie) {
       var d = el("details", "groupe-replie"), s = el("summary"), pt = el("i", "pt jamais"); pt.setAttribute("aria-hidden", "true");
@@ -118,8 +130,8 @@
       if (items.some(function (x) { return x.id === ouvertId; })) d.open = true;
       cible.append(d); return;
     }
-    cible.append(el("p", "groupe", titre));
-    items.forEach(function (x) { cible.append(flux(x, x.id === ouvertId)); });
+    var tt = el("p", "groupe", titre); if (panne) tt.id = "pPannes"; cible.append(tt);
+    items.forEach(function (x) { cible.append(flux(x, x.id === ouvertId, panne)); });
   }
 
   function afficher(e, ouvertId) {
@@ -130,7 +142,7 @@
     if (!e.journal_lu) l.append(el("p", "msg erreur", "Journal illisible pour l'instant : les derniers passages ne s'affichent pas."));
     var o = e.onglets || [], par = function (f) { return o.filter(f).sort(function (a, b) { return a.nom.localeCompare(b.nom, "fr"); }); };
     var souci = par(function (x) { return x.etat === "actif" && x.erreurs && x.erreurs.length; });
-    groupe(l, "En panne", souci, ouvertId);
+    groupe(l, "En panne", souci, ouvertId, false, true);
     groupe(l, "En pause", par(function (x) { return x.etat === "pause"; }), ouvertId);
     var actifs = par(function (x) { return x.etat === "actif" && !(x.erreurs && x.erreurs.length); }), fam = {};
     actifs.forEach(function (x) { (fam[x.famille] = fam[x.famille] || []).push(x); });
@@ -150,6 +162,17 @@
         msg("msgP", err.message, true);
       });
   }
+
+  // Le bouton « en panne » de la colonne État ouvre directement la liste des pannes de Piloter.
+  function defiler() {
+    var t = $("pPannes");
+    if (t) { t.scrollIntoView({ block: "start" }); msg("msgP", ""); } else msg("msgP", "Aucune panne en ce moment.");
+  }
+  window.Pilotage = { versPannes: function () {
+    vue("piloter"); history.replaceState(null, "", "#piloter");
+    if (dernierEtat) { charger(true).then(defiler); return; }
+    charger().then(function () { if (dernierEtat) defiler(); });
+  } };
 
   // ─── Relier, oublier ───
   $("btnPMaj").addEventListener("click", function () { charger(); });
