@@ -1,5 +1,5 @@
 // Coulisses : cache du code seulement. L'état (etat.json) n'est jamais mis en cache ici.
-const C="coulisses-v11";   // ne supprime que ses propres caches (coulisses-…) : la carte et LIFE vivent à la même adresse
+const C="coulisses-v12";   // ne supprime que ses propres caches (coulisses-…) : la carte et LIFE vivent à la même adresse
 const FILES=["./","./index.html","./app.js","./piloter.js","./style.css","./connexion.js","./connexion.css","./qr.js","./manifest.webmanifest","./icon-192.png","./icon-512.png","./icon-maskable-512.png","./icon.svg",
   "./fonts/instrument-sans.woff2","./fonts/plex-mono-400.woff2","./fonts/plex-mono-500.woff2","./fonts/plex-mono-600.woff2","./fonts/plex-mono-700.woff2"];   // polices hébergées avec l'app (charte commune)
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));});
