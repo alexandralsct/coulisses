@@ -152,15 +152,6 @@
   }
 
   // ─── Relier, oublier ───
-  $("btnPRelier").addEventListener("click", function () {
-    var a = $("champAdresse").value.trim().replace(/\/+$/, ""), k = $("champCle").value.trim(), u;
-    try { u = new URL(a); } catch (e) { u = null; }
-    if (!u || u.protocol !== "https:" || u.pathname !== "/" || u.search || u.hash) { msg("msgPRelier", "Écris l'adresse sous la forme https://nom-du-serveur, sans chemin.", true); return; }
-    if (!/^[0-9a-f]{32,128}$/i.test(k)) { msg("msgPRelier", "La clé semble incomplète (lettres a-f et chiffres).", true); return; }
-    ecrire({ adresse: u.origin, cle: k }); $("champCle").value = "";
-    msg("msgPRelier", "Vérification…");
-    charger();
-  });
   $("btnPMaj").addEventListener("click", function () { charger(); });
   $("btnPOublier").addEventListener("click", function () {
     if (!window.confirm("Oublier la clé de pilotage sur cet appareil ?")) return;

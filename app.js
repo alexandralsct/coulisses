@@ -120,13 +120,8 @@
       });
   }
 
-  $("btnRelier").addEventListener("click", function () {
-    var depot = $("champDepot").value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\/$/, ""), jeton = $("champJeton").value.trim();
-    if (!/^[\w.-]+\/[\w.-]+$/.test(depot)) { $("msgRelier").textContent = "Écris le dépôt sous la forme compte/nom."; $("msgRelier").className = "msg erreur"; return; }
-    if (jeton.length < 20) { $("msgRelier").textContent = "Le jeton semble incomplet."; $("msgRelier").className = "msg erreur"; return; }
-    ecrire(CLE, { depot: depot, jeton: jeton }); $("champJeton").value = "";
-    $("msgRelier").textContent = "Vérification…"; $("msgRelier").className = "msg";
-    charger();
+  Array.prototype.forEach.call(document.querySelectorAll(".ouvre-cx"), function (b) {   // les deux « Relier » renvoient vers l'écran Connexion unique
+    b.addEventListener("click", function () { var d = $("cxCarte"); d.open = true; d.scrollIntoView({ block: "start" }); });
   });
   $("btnMaj").addEventListener("click", function () { charger(); });
   $("btnOublier").addEventListener("click", function () { oublier(CLE); oublier(CACHE); oublier(VUES); location.reload(); });
@@ -141,7 +136,7 @@
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
   var c = lire(CACHE); if (c && lire(CLE)) afficher(c);
   // Écran « Connexion » commun aux trois apps (connexion.js) : s'ouvre tout seul tant que Coulisses n'est pas relié.
-  Connexion.monter($("connexion-ecran"), { github: true, carteUrl: location.origin + "/carte-de-vie/",
+  Connexion.monter($("connexion-ecran"), { nomApp: "Coulisses", github: true, carteUrl: location.origin + "/carte-de-vie/",
     qr: function (t) { var q = qrcode(0, "M"); q.addData(t); q.make(); return q.createDataURL(6, 2); },
     apres: function () { setTimeout(function () { location.reload(); }, 1500); } });
   if (!lire(CLE)) $("cxCarte").open = true;

@@ -30,12 +30,8 @@
 
  <section id="relier" class="carte" hidden>
   <h2>Relier Coulisses</h2>
-  <p>Coulisses lit l'état de ton système dans ton dépôt privé. Il lui faut un jeton GitHub en <b>lecture seule</b>, limité à ce dépôt. Il reste sur cet appareil.</p>
-  <label for="champDepot">Dépôt (compte/nom)</label>
-  <input id="champDepot" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="compte/coulisses-donnees">
-  <label for="champJeton">Jeton</label>
-  <input id="champJeton" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
-  <button type="button" id="btnRelier" class="bouton plein">Relier</button>
+  <p>Coulisses lit l'état de ton système dans ton dépôt privé, avec un jeton GitHub en <b>lecture seule</b>. Le QR et la saisie des codes sont dans l'écran Connexion, le même dans toutes les apps.</p>
+  <button type="button" id="btnRelier" class="bouton plein ouvre-cx">Ouvrir Connexion</button>
   <p class="msg" id="msgRelier" role="status"></p>
  </section>
 
@@ -60,12 +56,8 @@
  <div class="col-piloter" id="colPiloter">
   <section id="pRelier" class="carte" hidden>
    <h2>Piloter Cocon</h2>
-   <p>Des boutons, sans IA : voir l'état en direct, relancer un flux, le mettre en pause, le reprendre, lire son journal, recevoir les alertes. Rien ne s'active d'ici : un flux jamais lancé s'active dans l'éditeur de Cocon.</p>
-   <label for="champAdresse">Adresse de Cocon</label>
-   <input id="champAdresse" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="url" placeholder="https://…">
-   <label for="champCle">Clé de pilotage</label>
-   <input id="champCle" type="password" autocomplete="off" spellcheck="false" placeholder="64 caractères">
-   <button type="button" id="btnPRelier" class="bouton plein">Relier</button>
+   <p>Des boutons, sans IA : voir l'état en direct, relancer un flux, le mettre en pause, le reprendre, lire son journal, recevoir les alertes. Rien ne s'active d'ici : un flux jamais lancé s'active dans l'éditeur de Cocon. L'adresse et la clé de pilotage se saisissent dans l'écran Connexion.</p>
+   <button type="button" id="btnPRelier" class="bouton plein ouvre-cx">Ouvrir Connexion</button>
    <p class="msg" id="msgPRelier" role="status"></p>
   </section>
   <div id="pContenu" hidden>
